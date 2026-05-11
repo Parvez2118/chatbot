@@ -5,6 +5,7 @@ function App() {
 
   const[message, setMessage] = useState("");
   const[reply, setReply] = useState("");
+  const[loading, setLoading] = useState(false);
 
   const callMethod = async () => {
     try {
