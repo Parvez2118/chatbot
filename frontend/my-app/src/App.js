@@ -24,7 +24,7 @@ function App() {
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8001/', {
+      const response = await fetch('http://127.0.0.1:8000/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: trimmed }),
@@ -60,8 +60,19 @@ function App() {
     }
   };
 
+  const createUser = async ()=>{
+     const response = await fetch('http://127.0.0.1:8000/create_user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: "Parvez",email:"abcamaan@gmail.com" }),
+      });
+      const data = await response.json();
+      console.log(data, "  data from create user api.........")
+  }
+
   return (
     <div className="app-shell">
+    <button onClick={()=>createUser()}>click</button>
       {/* Background orbs */}
       <div className="orb orb-1" />
       <div className="orb orb-2" />
