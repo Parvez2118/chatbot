@@ -8,6 +8,19 @@ from langchain_classic.agents import (
 from langchain_core.prompts import ChatPromptTemplate
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from database import get_db
+from database import engine, Base
+
+# IMPORTANT IMPORTS
+from models.user import User
+from models.chat import Conversation, Message
+from schemas import (
+    UserCreate,
+    UserResponse
+)
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 app = FastAPI()
@@ -19,9 +32,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup():
+
+    async with engine.begin() as conn:
+        await conn.run_sync(
+            Base.metadata.create_all
+        )
+
 @app.post("/")
 def read_root(body: dict):
     message = body.get("message")
+    
     print(f"Received message: {message}")
     prompt = ChatPromptTemplate.from_messages(
              [
@@ -52,3 +74,21 @@ def read_root(body: dict):
     return {"reply": agentData.get("output")}
 
 
+
+@app.post("/create_user")
+async def create_user(
+    user:UserCreate,
+    db:AsyncSession=Depends(get_db)
+):
+    print("inside create_user function ",   user)
+    new_user = User(
+        name=user.name,
+        email=user.email
+    )
+    db.add(new_user)
+
+    await db.commit()
+
+    await db.refresh(new_user)
+
+    return new_user
