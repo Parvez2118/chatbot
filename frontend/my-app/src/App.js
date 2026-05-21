@@ -1,55 +1,99 @@
 import './App.css';
 import { useState, useRef, useEffect } from 'react';
 
-function App() {
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([
-    { role: "assistant", text: "Hey there! I'm Claude, your AI assistant. How can I help you today?" }
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
-  const bottomRef = useRef(null);
-  const inputRef = useRef(null);
+import AuthPage         from './components/AuthPage';
+import Sidebar          from './components/Sidebar';
+import TopHeader        from './components/TopHeader';
+import MessageBubble    from './components/MessageBubble';
+import TypingIndicator  from './components/TypingIndicator';
+import InputBar         from './components/InputBar';
 
+// ── Helpers ───────────────────────────────────────────────────────
+function parseReply(raw) {
+  if (typeof raw === 'string')        return raw;
+  if (Array.isArray(raw))             return raw.map(b => b?.text ?? JSON.stringify(b)).join('');
+  if (raw && typeof raw === 'object') return raw.text ?? raw.content ?? JSON.stringify(raw);
+  return String(raw ?? 'No response');
+}
+
+const WELCOME = "Hey there! I'm Claude, your AI assistant. How can I help you today?";
+
+// ── App ───────────────────────────────────────────────────────────
+export default function App() {
+  // ── Auth state ───────────────────────────────────────────────────
+  // user = null  →  show AuthPage
+  // user = {...} →  show Chat
+  const [user, setUser] = useState(null);
+
+  // ── Chat state ───────────────────────────────────────────────────
+  const [message,     setMessage]     = useState('');
+  const [messages,    setMessages]    = useState([{ role: 'assistant', text: WELCOME }]);
+  const [isTyping,    setIsTyping]    = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showRecent,  setShowRecent]  = useState(false);
+  const [theme,       setTheme]       = useState('dark');
+
+  const bottomRef = useRef(null);
+
+  // Auto-scroll
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const callMethod = async () => {
+  // ── Auth handlers ─────────────────────────────────────────────────
+  const handleAuthSuccess = (userData) => {
+    setUser(userData);
+    // Reset chat for fresh session
+    setMessages([{
+      role: 'assistant',
+      text: `Welcome, ${userData.name.split(' ')[0]}! 👋 I'm Claude. How can I help you today?`,
+    }]);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setMessages([{ role: 'assistant', text: WELCOME }]);
+    setMessage('');
+    setSidebarOpen(false);
+    setShowRecent(false);
+  };
+
+  // ── Chat handlers ─────────────────────────────────────────────────
+  const toggleTheme   = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+  const toggleSidebar = () => setSidebarOpen(o => !o);
+  const toggleRecent  = () => setShowRecent(o => !o);
+
+  const startNewChat = () => {
+    setMessages([{
+      role: 'assistant',
+      text: `New chat started. What's on your mind, ${user?.name?.split(' ')[0] ?? 'there'}?`,
+    }]);
+    setMessage('');
+  };
+
+  const sendMessage = async () => {
     const trimmed = message.trim();
     if (!trimmed) return;
 
-    const userMsg = { role: "user", text: trimmed };
-    setMessages(prev => [...prev, userMsg]);
-    setMessage("");
+    setMessages(prev => [...prev, { role: 'user', text: trimmed }]);
+    setMessage('');
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/', {
+      const response = await fetch('http://127.0.0.1:8001/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: trimmed }),
       });
-      const data = await response.json();
-
-      // LangChain sometimes returns reply as an object {type, text, ...} or an array of such objects
-      const raw = data.reply;
-      let replyText = "";
-      if (typeof raw === "string") {
-        replyText = raw;
-      } else if (Array.isArray(raw)) {
-        replyText = raw.map(block => block?.text ?? JSON.stringify(block)).join("");
-      } else if (raw && typeof raw === "object") {
-        replyText = raw.text ?? raw.content ?? JSON.stringify(raw);
-      } else {
-        replyText = String(raw ?? "No response");
-      }
-
-      setMessages(prev => [...prev, { role: "assistant", text: replyText }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: "assistant", text: "⚠️ Connection error. Please check if the server is running." }]);
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: 'assistant', text: parseReply(data.reply) }]);
+    } catch {
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', text: '⚠️ Connection error. Please check if the server is running.' },
+      ]);
     } finally {
       setIsTyping(false);
-      inputRef.current?.focus();
     }
   };
 
@@ -60,100 +104,48 @@ function App() {
     }
   };
 
-  const createUser = async ()=>{
-     const response = await fetch('http://127.0.0.1:8000/create_user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: "Parvez",email:"abcamaan@gmail.com" }),
-      });
-      const data = await response.json();
-      console.log(data, "  data from create user api.........")
-  }
-
   return (
     <div className="app-shell">
-    <button onClick={()=>createUser()}>click</button>
       {/* Background orbs */}
       <div className="orb orb-1" />
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      <div className="chat-container">
-        {/* Header */}
-        <header className="chat-header">
-          <div className="avatar-ring">
-            <div className="avatar-dot" />
-          </div>
-          <div className="header-info">
-            <h1 className="header-name">Botchat</h1>
-            <span className="header-status">
-              <span className="pulse" />
-              Online
-            </span>
-          </div>
-          <div className="header-badge">AI</div>
-        </header>
+      <Sidebar
+        isOpen={sidebarOpen}
+        onToggle={toggleSidebar}
+        onNewChat={startNewChat}
+        showRecent={showRecent}
+        onToggleRecent={toggleRecent}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
 
-        {/* Messages */}
-        <main className="messages-area">
-          {messages.map((msg, i) => (
-            <div key={i} className={`message-row ${msg.role}`}>
-              {msg.role === "assistant" && (
-                <div className="msg-avatar">B</div>
-              )}
-              <div className="bubble-wrap">
-                <div className={`bubble ${msg.role}`}>
-                  {msg.text}
-                </div>
-                <span className="timestamp">
-                  {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-            </div>
-          ))}
+      <div className="main-area">
+        <TopHeader
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          user={user}
+          onLogout={handleLogout}
+        />
 
-          {isTyping && (
-            <div className="message-row assistant">
-              <div className="msg-avatar">C</div>
-              <div className="bubble-wrap">
-                <div className="bubble assistant typing-bubble">
-                  <span className="dot" />
-                  <span className="dot" />
-                  <span className="dot" />
-                </div>
-              </div>
-            </div>
-          )}
+        <div className="chat-container">
+          <main className="messages-area">
+            {messages.map((msg, i) => (
+              <MessageBubble key={i} role={msg.role} text={msg.text} />
+            ))}
+            {isTyping && <TypingIndicator />}
+            <div ref={bottomRef} />
+          </main>
 
-          <div ref={bottomRef} />
-        </main>
-
-        {/* Input */}
-        <footer className="input-bar">
-          <textarea
-            ref={inputRef}
-            className="chat-input"
-            placeholder="Send a message…"
+          <InputBar
             value={message}
-            rows={1}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onChange={setMessage}
+            onSend={sendMessage}
+            isTyping={isTyping}
           />
-          <button
-            className={`send-btn ${message.trim() ? "active" : ""}`}
-            onClick={callMethod}
-            disabled={!message.trim() || isTyping}
-            aria-label="Send message"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
-          </button>
-        </footer>
+        </div>
       </div>
     </div>
   );
 }
-
-export default App;
