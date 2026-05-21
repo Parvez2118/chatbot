@@ -140,19 +140,23 @@ function SignInForm({ onSuccess }) {
 
     try {
       // ⚠️  Replace this URL with your real sign-in endpoint when ready
-      const res  = await fetch('http://127.0.0.1:8000/login', {
+      const res  = await fetch('http://127.0.0.1:8000/validate_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
       const data = await res.json();
 
+      console.log(res, data )
+
       if (!res.ok) {
         setApiError(data?.detail || 'Invalid email or password.');
         return;
       }
 
-      onSuccess({ id: data.id, name: data.name, email: data.email });
+      localStorage.setItem("token", data.access_token)
+
+      onSuccess({ id: data.user.id, name: data.user.name, email: data.user.email });
     } catch {
       setApiError('Sign-in API not available yet. Please sign up first.');
     } finally {

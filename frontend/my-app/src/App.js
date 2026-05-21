@@ -80,7 +80,7 @@ export default function App() {
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8001/', {
+      const res  = await fetch('http://127.0.0.1:8000/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: trimmed }),
@@ -97,16 +97,18 @@ export default function App() {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      callMethod();
-    }
-  };
+  // ── Render: Auth gate ─────────────────────────────────────────────
+  if (!user) {
+    return (
+      <div data-theme={theme}>
+        <AuthPage onAuthSuccess={handleAuthSuccess} />
+      </div>
+    );
+  }
 
+  // ── Render: Chat ──────────────────────────────────────────────────
   return (
-    <div className="app-shell">
-      {/* Background orbs */}
+    <div className="app-shell" data-theme={theme}>
       <div className="orb orb-1" />
       <div className="orb orb-2" />
       <div className="orb orb-3" />
