@@ -1,12 +1,7 @@
 import { IconMenu, IconNewChat, IconRecent, IconSun, IconMoon } from './Icons';
 
-const RECENT_CHATS = [
-  { id: 1, label: 'Magic function test' },
-  { id: 2, label: 'Python debugging help' },
-  { id: 3, label: 'What is LangChain?' },
-];
 
-export default function Sidebar({ isOpen, onToggle, onNewChat, showRecent, onToggleRecent, theme, onToggleTheme }) {
+export default function Sidebar({ isOpen, onToggle, onNewChat, showRecent, onToggleRecent, theme, onToggleTheme, conversationData, getMessageById }) {
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
 
@@ -18,7 +13,7 @@ export default function Sidebar({ isOpen, onToggle, onNewChat, showRecent, onTog
       <div className="sidebar-divider" />
 
       {/* New Chat */}
-      <button className="sidebar-item" onClick={onNewChat} title="New Chat">
+      <button className="sidebar-item" onClick={()=>onNewChat(true)} title="New Chat">
         <span className="sidebar-icon"><IconNewChat /></span>
         {isOpen && <span className="sidebar-label">New Chat</span>}
       </button>
@@ -36,10 +31,10 @@ export default function Sidebar({ isOpen, onToggle, onNewChat, showRecent, onTog
       {/* Recent list */}
       {isOpen && showRecent && (
         <ul className="recent-list">
-          {RECENT_CHATS.map(chat => (
-            <li key={chat.id} className="recent-item">
+          {conversationData.map(chat => (
+            <li key={chat.id} className="recent-item" onClick={()=> getMessageById(chat.id, false)}>
               <span className="recent-dot" />
-              <span className="recent-text">{chat.label}</span>
+              <span className="recent-text">{chat.title}</span>
             </li>
           ))}
         </ul>

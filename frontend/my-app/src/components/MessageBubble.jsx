@@ -2,22 +2,50 @@ import ReactMarkdown from 'react-markdown';
 
 // Fixes literal "\n" strings sent as escaped text from the backend
 function normalizeText(text) {
-  return text.replace(/\\n/g, '\n');
+  return JSON.parse(text)
 }
 
+
+function extractText(data) {
+  if (typeof data === "string") {
+    return data;
+  }
+
+  if (Array.isArray(data)) {
+    return data
+      .map(item => {
+        if (typeof item === "string") return item;
+        if (item.type === "text") return item.text;
+        return "";
+      })
+      .join("");
+  }
+
+  return "";
+}
+
+
+
 export default function MessageBubble({ role, text }) {
-  const clean = normalizeText(text);
-  const time  = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  let clean = text;
+  if (role === "AI") {
+    
+       clean = extractText(JSON.parse(text));
+    
+    
+  }
+
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className={`message-row ${role}`}>
 
       {/* Avatar — only for assistant */}
-      {role === 'assistant' && <div className="msg-avatar">C</div>}
+      {role === 'AI' && <div className="msg-avatar">C</div>}
 
       <div className="bubble-wrap">
         <div className={`bubble ${role}`}>
-          {role === 'assistant' ? (
+          {role === 'AI' ? (
             // Markdown rendered for AI replies
             <ReactMarkdown
               components={{

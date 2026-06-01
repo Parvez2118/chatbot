@@ -29,7 +29,7 @@ class Conversation(Base):
         ForeignKey("users.id")
     )
 
-    title = Column(String) #summary of the conversation 
+    title = Column(String,default=None) #summary of the conversation 
 
     created_at = Column(
         DateTime(timezone=True),
