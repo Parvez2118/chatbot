@@ -75,7 +75,7 @@ function SignUpForm({ onSuccess }) {
     setLoading(true);
 
     try {
-      const res  = await fetch('http://127.0.0.1:8000/create_user', {
+      const res  = await fetch('https://chatbot-dw95.onrender.com/create_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -140,7 +140,7 @@ function SignInForm({ onSuccess }) {
 
     try {
       // ⚠️  Replace this URL with your real sign-in endpoint when ready
-      const res  = await fetch('http://127.0.0.1:8000/validate_user', {
+      const res  = await fetch('https://chatbot-dw95.onrender.com/validate_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

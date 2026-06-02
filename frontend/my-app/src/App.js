@@ -61,7 +61,7 @@ export default function App() {
 
   async function conversationlist() {
     const token = localStorage.getItem("token")
-    const conversationList = await fetch('http://127.0.0.1:8000/conversations', {
+    const conversationList = await fetch('https://chatbot-dw95.onrender.com/conversations', {
       method: 'GET',
       headers: { 'token': token, 'Content-Type': 'application/json' }
     });
@@ -75,7 +75,7 @@ export default function App() {
     setIsapiCall(value);
     setchatIdConversation(id);
     setMessages([]);
-    const messageList = await fetch(`http://127.0.0.1:8000/getmessages/${id}`, {
+    const messageList = await fetch(`https://chatbot-dw95.onrender.com/getmessages/${id}`, {
       method: 'GET',
       headers: { 'token': token, 'Content-Type': 'application/json' }
     });
@@ -140,7 +140,7 @@ export default function App() {
       }
       
       if (isapiCall) {
-        const chatId = await fetch('http://127.0.0.1:8000/create_chat_id', {
+        const chatId = await fetch('https://chatbot-dw95.onrender.com/create_chat_id', {
           method: 'POST',
           headers: { 'token': token, 'Content-Type': 'application/json' }
         });
@@ -148,7 +148,7 @@ export default function App() {
         setchatIdConversation(cid.id);
 
 
-        const summarise = await fetch(`http://127.0.0.1:8000/summarise/${cid.id}`, {
+        const summarise = await fetch(`https://chatbot-dw95.onrender.com/summarise/${cid.id}`, {
           method: 'POST',
           headers: { 'token': token, 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: trimmed }),
@@ -156,7 +156,7 @@ export default function App() {
         const summarisedata = await summarise.json();
 
 
-        const res = await fetch(`http://127.0.0.1:8000/stream_chat/${cid.id}`, {
+        const res = await fetch(`https://chatbot-dw95.onrender.com/stream_chat/${cid.id}`, {
           method: 'POST',
           headers: { 'token': token, 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: trimmed }),
@@ -172,7 +172,7 @@ export default function App() {
         conversationlist()
       }
       else {
-        const res = await fetch(`http://127.0.0.1:8000/stream_chat/${chatIdConversation}`, {
+        const res = await fetch(`https://chatbot-dw95.onrender.com/stream_chat/${chatIdConversation}`, {
           method: 'POST',
           headers: { 'token': token, 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: trimmed }),
