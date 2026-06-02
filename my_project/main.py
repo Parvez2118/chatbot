@@ -54,17 +54,14 @@ async def startup():
             Base.metadata.create_all
         )
 
-# JWT Config
-SECRET_KEY = "mysecretkey"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
 
 def create_access_token(data: dict):
 
     to_encode = data.copy()
 
     expire = datetime.utcnow() + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        minutes=os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
     )
 
     to_encode.update({
@@ -73,8 +70,8 @@ def create_access_token(data: dict):
 
     encoded_jwt = jwt.encode(
         to_encode,
-        SECRET_KEY,
-        algorithm=ALGORITHM
+        os.getenv("SECRET_KEY"),
+        algorithm=os.getenv("ALGORITHM")
     )
 
     return encoded_jwt
@@ -83,8 +80,8 @@ def verify_token(token: str):
     try:
         payload = jwt.decode(
             token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM]
+            os.getenv("SECRET_KEY"),
+            algorithms=[os.getenv("ALGORITHM")]
         )
 
         return payload
