@@ -9,12 +9,12 @@ import TypingIndicator from './components/TypingIndicator';
 import InputBar from './components/InputBar';
 import { jwtDecode } from 'jwt-decode';
 // ── Helpers ───────────────────────────────────────────────────────
-function parseReply(raw) {
-  if (typeof raw === 'string') return raw;
-  if (Array.isArray(raw)) return raw.map(b => b?.text ?? JSON.stringify(b)).join('');
-  if (raw && typeof raw === 'object') return raw.text ?? raw.content ?? JSON.stringify(raw);
-  return String(raw ?? 'No response');
-}
+// function parseReply(raw) {
+//   if (typeof raw === 'string') return raw;
+//   if (Array.isArray(raw)) return raw.map(b => b?.text ?? JSON.stringify(b)).join('');
+//   if (raw && typeof raw === 'object') return raw.text ?? raw.content ?? JSON.stringify(raw);
+//   return String(raw ?? 'No response');
+// }
 
 const WELCOME = JSON.stringify("Hey there! I'm Claude, your AI assistant. How can I help you today?");
 
@@ -55,8 +55,8 @@ export default function App() {
       setUser(decoded);
       setIsapiCall(true);
       setTokenPresent(true);
-    }
     conversationlist();
+    }
   }, [])
 
   async function conversationlist() {
@@ -148,12 +148,12 @@ export default function App() {
         setchatIdConversation(cid.id);
 
 
-        const summarise = await fetch(`https://chatbot-dw95.onrender.com/summarise/${cid.id}`, {
+         await fetch(`https://chatbot-dw95.onrender.com/summarise/${cid.id}`, {
           method: 'POST',
           headers: { 'token': token, 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: trimmed }),
         });
-        const summarisedata = await summarise.json();
+        // const summarisedata = await summarise.json();
 
 
         const res = await fetch(`https://chatbot-dw95.onrender.com/stream_chat/${cid.id}`, {

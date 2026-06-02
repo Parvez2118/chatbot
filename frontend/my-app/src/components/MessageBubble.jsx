@@ -1,9 +1,9 @@
 import ReactMarkdown from 'react-markdown';
 
 // Fixes literal "\n" strings sent as escaped text from the backend
-function normalizeText(text) {
-  return JSON.parse(text)
-}
+// function normalizeText(text) {
+//   return JSON.parse(text)
+// }
 
 
 function extractText(data) {
