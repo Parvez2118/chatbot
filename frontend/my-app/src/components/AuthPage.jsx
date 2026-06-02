@@ -192,8 +192,8 @@ export default function AuthPage({ onAuthSuccess }) {
       <div className="auth-card">
         {/* Logo */}
         <div className="auth-logo">
-          <div className="auth-logo-ring">C</div>
-          <h1 className="auth-logo-name">Claude</h1>
+          <div className="auth-logo-ring">A</div>
+          <h1 className="auth-logo-name">Ask AI</h1>
         </div>
 
         <p className="auth-tagline">Your AI-powered assistant</p>

@@ -41,7 +41,7 @@ export default function MessageBubble({ role, text }) {
     <div className={`message-row ${role}`}>
 
       {/* Avatar — only for assistant */}
-      {role === 'AI' && <div className="msg-avatar">C</div>}
+      {role === 'AI' && <div className="msg-avatar">A</div>}
 
       <div className="bubble-wrap">
         <div className={`bubble ${role}`}>
