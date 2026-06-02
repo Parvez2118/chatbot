@@ -20,9 +20,9 @@ export default function TopHeader({ theme, onToggleTheme, user, onLogout }) {
 
       {/* Left: Claude branding */}
       <div className="th-left">
-        <div className="th-avatar"><span>C</span></div>
+        <div className="th-avatar"><span>A</span></div>
         <div className="th-info">
-          <h1 className="th-name">Claude</h1>
+          <h1 className="th-name">Ask AI</h1>
           <span className="th-status">
             <span className="pulse" />
             Online

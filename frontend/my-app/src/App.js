@@ -16,7 +16,7 @@ import { jwtDecode } from 'jwt-decode';
 //   return String(raw ?? 'No response');
 // }
 
-const WELCOME = JSON.stringify("Hey there! I'm Claude, your AI assistant. How can I help you today?");
+const WELCOME = JSON.stringify("Hey there! I'm ASK AI, your AI assistant. How can I help you today?");
 
 // ── App ───────────────────────────────────────────────────────────
 export default function App() {
@@ -96,7 +96,7 @@ export default function App() {
     // Reset chat for fresh session
     setMessages([{
       sender: 'AI',
-      content: JSON.stringify(`Welcome, ${userData.name.split(' ')[0]}! 👋 I'm Claude. How can I help you today?`),
+      content: JSON.stringify(`Welcome, ${userData.name.split(' ')[0]}! 👋 I'm AI. How can I help you today?`),
     }]);
   };
 
