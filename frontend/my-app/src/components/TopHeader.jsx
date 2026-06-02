@@ -49,7 +49,7 @@ export default function TopHeader({ theme, onToggleTheme, user, onLogout }) {
         </button>
 
         {/* User pill */}
-        {user && (
+        {user.name && (
           <div className="th-user-pill">
             <div className="th-user-avatar">{initials}</div>
             <span className="th-user-name">{user.name.split(' ')[0]}</span>

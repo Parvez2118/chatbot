@@ -40,12 +40,12 @@ class ConversationRepository:
             raise e
 
     
-    async def get_all_conversations(self):
+    async def get_all_conversations(self,user_id):
         result = await self.db.execute(
             select(
                 Conversation.id,
                 Conversation.title
-            )
+            ).where(Conversation.user_id == user_id).order_by(Conversation.created_at.desc())
         )
 
         conversations = result.all()

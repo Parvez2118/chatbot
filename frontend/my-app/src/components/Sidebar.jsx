@@ -1,7 +1,9 @@
 import { IconMenu, IconNewChat, IconRecent, IconSun, IconMoon } from './Icons';
+import { useState } from 'react';
 
 
 export default function Sidebar({ isOpen, onToggle, onNewChat, showRecent, onToggleRecent, theme, onToggleTheme, conversationData, getMessageById }) {
+  const [activeChatId, setActiveChatId] = useState(null);
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
 
@@ -32,7 +34,10 @@ export default function Sidebar({ isOpen, onToggle, onNewChat, showRecent, onTog
       {isOpen && showRecent && (
         <ul className="recent-list">
           {conversationData.map(chat => (
-            <li key={chat.id} className="recent-item" onClick={()=> getMessageById(chat.id, false)}>
+            <li key={chat.id} className={`recent-item ${activeChatId === chat.id ? 'active' : ''}`} onClick={()=> {
+              getMessageById(chat.id, false);
+              setActiveChatId(chat.id);
+            }}>
               <span className="recent-dot" />
               <span className="recent-text">{chat.title}</span>
             </li>

@@ -7,7 +7,7 @@ import TopHeader from './components/TopHeader';
 import MessageBubble from './components/MessageBubble';
 import TypingIndicator from './components/TypingIndicator';
 import InputBar from './components/InputBar';
-
+import { jwtDecode } from 'jwt-decode';
 // ── Helpers ───────────────────────────────────────────────────────
 function parseReply(raw) {
   if (typeof raw === 'string') return raw;
@@ -51,19 +51,24 @@ export default function App() {
       console.log(" not present ")
     }
     if (token) {
+      const decoded = jwtDecode(token);
+      setUser(decoded);
+      setIsapiCall(true);
       setTokenPresent(true);
     }
-    async function clist() {
-      const conversationList = await fetch('http://127.0.0.1:8000/conversations', {
-        method: 'GET',
-        headers: { 'token': token, 'Content-Type': 'application/json' }
-      });
-      const convData = await conversationList.json();
-      setconversationData(convData.data)
-    }
-
-    clist()
+    conversationlist();
   }, [])
+
+  async function conversationlist() {
+    const token = localStorage.getItem("token")
+    const conversationList = await fetch('http://127.0.0.1:8000/conversations', {
+      method: 'GET',
+      headers: { 'token': token, 'Content-Type': 'application/json' }
+    });
+    const convData = await conversationList.json();
+    setconversationData(convData.data)
+  }
+
 
   const getMessageById = async (id, value) => {
     const token = localStorage.getItem("token")
@@ -80,16 +85,24 @@ export default function App() {
   }
 
   // ── Auth handlers ─────────────────────────────────────────────────
-  const handleAuthSuccess = (userData) => {
+  const handleAuthSuccess = async (userData) => {
     setUser(userData);
+    if (userData.token) {
+      setTokenPresent(true);
+      setIsapiCall(true);
+      conversationlist();
+    }
+
     // Reset chat for fresh session
     setMessages([{
-      role: 'AI',
-      text: `Welcome, ${userData.name.split(' ')[0]}! 👋 I'm Claude. How can I help you today?`,
+      sender: 'AI',
+      content: JSON.stringify(`Welcome, ${userData.name.split(' ')[0]}! 👋 I'm Claude. How can I help you today?`),
     }]);
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("token");
+    setTokenPresent(false)
     setUser(null);
     setMessages([{ role: 'AI', text: WELCOME }]);
     setMessage('');
@@ -125,6 +138,7 @@ export default function App() {
       if (!token) {
         return "token is not present";
       }
+      
       if (isapiCall) {
         const chatId = await fetch('http://127.0.0.1:8000/create_chat_id', {
           method: 'POST',
@@ -148,13 +162,14 @@ export default function App() {
           body: JSON.stringify({ message: trimmed }),
         });
         const data = await res.json();
-        let chunkdata=data.reply;
+        let chunkdata = data.reply;
         if (typeof chunkdata !== "string") {
-            chunkdata = extractText(data.reply)
+          chunkdata = extractText(data.reply)
         }
-       
+
         setMessages(prev => [...prev, { sender: 'AI', content: JSON.stringify(chunkdata) }]);
         setIsapiCall(false);
+        conversationlist()
       }
       else {
         const res = await fetch(`http://127.0.0.1:8000/stream_chat/${chatIdConversation}`, {
@@ -163,13 +178,14 @@ export default function App() {
           body: JSON.stringify({ message: trimmed }),
         });
         const data = await res.json();
-        let chunkdata=data.reply;
+        let chunkdata = data.reply;
 
         if (typeof chunkdata !== "string") {
-            chunkdata = extractText(data.reply)
+          chunkdata = extractText(data.reply)
         }
 
         setMessages(prev => [...prev, { sender: 'AI', content: JSON.stringify(chunkdata) }]);
+        setIsapiCall(false);
       }
 
     } catch {

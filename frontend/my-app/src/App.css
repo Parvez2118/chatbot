@@ -161,10 +161,40 @@ html, body, #root {
 .theme-toggle-btn { color:var(--text-muted); }
 .theme-toggle-btn:hover { color:var(--accent); }
 
-.recent-list { list-style:none; width:100%; display:flex; flex-direction:column; gap:2px; padding-left:10px; overflow:hidden; animation:fadeSlide .22s ease both; }
+.recent-list {
+  list-style: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 10px;
+
+  max-height: 700px; /* or any value */
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  animation: fadeSlide .22s ease both;
+}
+.recent-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.recent-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.recent-list::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.5);
+  border-radius: 4px;
+}
+
+.recent-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.8);
+}
 @keyframes fadeSlide { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 .recent-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; font-size:12.5px; color:var(--text-muted); cursor:pointer; white-space:nowrap; overflow:hidden; transition:background .15s,color .15s; }
-.recent-item:hover { background:var(--bg-surface-hover); color:var(--text-primary); }
+.recent-item:hover,
+.recent-item.active { background:var(--bg-surface-hover); color:var(--text-primary); }
 .recent-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); opacity:.55; flex-shrink:0; }
 .recent-text { overflow:hidden; text-overflow:ellipsis; }
 

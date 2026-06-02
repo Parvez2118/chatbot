@@ -156,7 +156,7 @@ function SignInForm({ onSuccess }) {
 
       localStorage.setItem("token", data.access_token)
 
-      onSuccess({ id: data.user.id, name: data.user.name, email: data.user.email });
+      onSuccess({ id: data.user.id, name: data.user.name, email: data.user.email, token:data.access_token });
     } catch {
       setApiError('Sign-in API not available yet. Please sign up first.');
     } finally {

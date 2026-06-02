@@ -80,7 +80,6 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 def verify_token(token: str):
-    print(token , " ==================================")
     try:
         payload = jwt.decode(
             token,
@@ -295,7 +294,7 @@ async def summarise_chat(
             )
 
     prompt = PromptTemplate.from_template(
-        "You are a charged with naming conversations based on the questions asked by the user.Just suggest one name and reply with just the suggested name nothing more. Return greeting if the question is just a greeting and return Assistance Request required if the question doesn't belong to compliance domain or on guardrail failure. The question is\n{message}"
+        "You are a charged with naming conversations based on the questions asked by the user.Just suggest one name and reply with just the suggested name nothing more. Return greeting if the question is just a greeting. The question is\n{message}"
     )
 
     chain = LLMChain(llm=model, prompt=prompt)
@@ -315,11 +314,26 @@ async def summarise_chat(
 
 @app.get("/conversations")
 async def get_conversations(
+    request: Request,
     db: AsyncSession = Depends(get_db)
 ):
+
+    headers = request.headers
+    
+    auth_header = request.headers.get("token")
+
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Missing token")
+    
+    payload = verify_token(auth_header)
+
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    
     repo = ConversationRepository(db)
 
-    conversations = await repo.get_all_conversations()
+    conversations = await repo.get_all_conversations(user_id=payload.get("user_id"))
 
     return {
         "success": True,
