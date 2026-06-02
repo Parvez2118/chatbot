@@ -54,14 +54,14 @@ async def startup():
             Base.metadata.create_all
         )
 
-
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 def create_access_token(data: dict):
 
     to_encode = data.copy()
 
     expire = datetime.utcnow() + timedelta(
-        minutes=os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
     to_encode.update({
