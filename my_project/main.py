@@ -10,7 +10,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_classic.chains import LLMChain
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database import get_db
@@ -167,57 +167,72 @@ async def read_root(request: Request,
 
 @app.post("/create_user")
 async def create_user(
-    user:UserCreate,
-    db:AsyncSession=Depends(get_db)
+    user: UserCreate,
+    db: AsyncSession = Depends(get_db)
 ):
-    print("inside create_user function ",   user)
+    stmt = select(User).where(User.email == user.email)
+
+    result = await db.execute(stmt)
+
+    userdata = result.scalar_one_or_none()
+
+    if userdata:
+        raise HTTPException(
+            status_code=400,
+            detail="User already exists"
+        )
+
     new_user = User(
         name=user.name,
         email=user.email,
         password=user.password
     )
+
     db.add(new_user)
 
     await db.commit()
 
     await db.refresh(new_user)
 
-    return new_user
+    return {
+        "success": True,
+        "message": "User created successfully",
+        "data": {
+            "id": new_user.id,
+            "name": new_user.name,
+            "email": new_user.email
+        }
+    }
 
 
 @app.post("/validate_user")
 async def validate_user(
-    user:ValidateUser,
-    db:AsyncSession=Depends(get_db)
+    user: ValidateUser,
+    db: AsyncSession = Depends(get_db)
 ):
-    print("inside vaidate function ",   user)
-
     stmt = select(User).where(
         User.email == user.email
     )
 
-    result  = await db.execute(stmt)
-
+    result = await db.execute(stmt)
     userdata = result.scalar_one_or_none()
 
     if not userdata:
-        return {
-            "success":False,
-            "message":"User not found"
-        }
-    
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
     if userdata.password != user.password:
-        return {
-            "success": False,
-            "message": "Invalid Password"
-        }
-    
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
     access_token = create_access_token({
         "user_id": str(userdata.id),
         "email": userdata.email
     })
-
-    
 
     return {
         "success": True,

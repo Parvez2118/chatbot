@@ -66,35 +66,53 @@ function SignUpForm({ onSuccess }) {
     return e;
   };
 
-  const handleSubmit = async () => {
-    const e = validate();
-    if (Object.keys(e).length) { setErrors(e); return; }
+ const handleSubmit = async () => {
+  const e = validate();
 
-    setErrors({});
-    setApiError('');
-    setLoading(true);
+  if (Object.keys(e).length) {
+    setErrors(e);
+    return;
+  }
 
-    try {
-      const res  = await fetch('https://chatbot-dw95.onrender.com/create_user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
+  setErrors({});
+  setApiError('');
+  setLoading(true);
 
-      if (!res.ok) {
-        setApiError(data?.detail || 'Something went wrong. Please try again.');
-        return;
+  try {
+    const res = await fetch('https://chatbot-dw95.onrender.com/create_user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      let errorMessage = 'Something went wrong. Please try again.';
+
+      if (typeof data.detail === 'string') {
+        errorMessage = data.detail;
       }
 
-      // Pass user info up to App
-      onSuccess({ id: data.id, name: data.name, email: data.email, password: data.password });
-    } catch {
-      setApiError('Cannot reach server. Make sure the backend is running.');
-    } finally {
-      setLoading(false);
+      setApiError(errorMessage);
+      return;
     }
-  };
+
+    onSuccess({
+      id: data.data.id,
+      name: data.data.name,
+      email: data.data.email,
+    });
+
+  } catch (error) {
+    console.error(error);
+    setApiError('Cannot reach server. Make sure the backend is running.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-form">
@@ -139,7 +157,7 @@ function SignInForm({ onSuccess }) {
     setLoading(true);
 
     try {
-      // ⚠️  Replace this URL with your real sign-in endpoint when ready
+      
       const res  = await fetch('https://chatbot-dw95.onrender.com/validate_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -147,10 +165,8 @@ function SignInForm({ onSuccess }) {
       });
       const data = await res.json();
 
-      console.log(res, data )
-
       if (!res.ok) {
-        setApiError(data?.detail || 'Invalid email or password.');
+        setApiError(data?.detail || 'Something went wrong. Please try again.');
         return;
       }
 
